@@ -1,5 +1,5 @@
 --[=[ 
-    Blox Fruit Hub - Full Fixed Version (Speed 250 Studs/s)
+    Blox Fruit Hub - Weapon Selector & Full Fixed Version (Speed 250 Studs/s)
     คัดลอกโค้ดทั้งหมดนี้ไปวางทับในสคริปต์ของคุณได้เลย
 ]=]
 
@@ -89,7 +89,7 @@ local titleLabel = Instance.new("TextLabel")
 titleLabel.Size = UDim2.new(0, 320, 1, 0)
 titleLabel.Position = UDim2.new(0, 12, 0, 0)
 titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "Blox Fruit Hub <font color=\"rgb(150,150,170)\">• Full Fixed Version</font>"
+titleLabel.Text = "Blox Fruit Hub <font color=\"rgb(150,150,170)\">• Weapon Select Fixed</font>"
 titleLabel.RichText = true
 titleLabel.TextColor3 = Color3.fromRGB(240, 240, 240)
 titleLabel.Font = Enum.Font.GothamBold
@@ -254,7 +254,7 @@ divider.BorderSizePixel = 0
 divider.Parent = contentArea
 
 -- -------------------------------------------------------
--- 2. Variables & State
+-- 2. Variables & State (Added Weapon Selection)
 -- -------------------------------------------------------
 local isFarming = false
 local bringMobEnabled = false
@@ -269,7 +269,10 @@ local chestEspEnabled = false
 local farmHeightY = 15
 local bringDistance = 150
 local attackDelay = 0.1
-local moveTweenSpeed = 250 -- ปรับความเร็ว Tween เป็น 250 ตามต้องการ
+local moveTweenSpeed = 250
+
+-- ค่าตั้งต้นประเภทอาวุธ: "Melee", "Fruit", "Sword"
+local selectedWeaponType = "Melee" 
 
 -- -------------------------------------------------------
 -- 3. Level & Quest Database (1 to 2800)
@@ -457,6 +460,71 @@ local function createToggle(parentTab, text, defaultState, callback)
 	end)
 end
 
+-- สร้าง UI สำหรับเลือกประเภทอาวุธ (Melee / Fruit / Sword)
+local function createWeaponDropdown(parentTab)
+	local container = Instance.new("Frame")
+	container.Size = UDim2.new(0.95, 0, 0, 50)
+	container.BackgroundTransparency = 1
+	container.Parent = parentTab
+
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(1, 0, 0, 20)
+	label.BackgroundTransparency = 1
+	label.Text = "Select Farm Weapon Type"
+	label.TextColor3 = Color3.fromRGB(200, 200, 220)
+	label.Font = Enum.Font.Gotham
+	label.TextSize = 11
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.Parent = container
+
+	local btnLayout = Instance.new("UIListLayout")
+	btnLayout.Parent = container
+	btnLayout.FillDirection = Enum.FillDirection.Horizontal
+	btnLayout.HorizontalAlignment = Enum.HorizontalAlignment.SpaceBetween
+	btnLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
+	btnLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+	local weapons = {"Melee", "Fruit", "Sword"}
+	local buttons = {}
+
+	for _, wName in ipairs(weapons) do
+		local btn = Instance.new("TextButton")
+		btn.Size = UDim2.new(0.31, 0, 0, 26)
+		btn.BackgroundColor3 = (selectedWeaponType == wName) and PURPLE_DARK_BG or Color3.fromRGB(24, 24, 32)
+		btn.TextColor3 = (selectedWeaponType == wName) and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(160, 160, 180)
+		btn.Text = wName
+		btn.Font = Enum.Font.GothamBold
+		btn.TextSize = 11
+		btn.Parent = container
+
+		local btnCorner = Instance.new("UICorner")
+		btnCorner.CornerRadius = UDim.new(0, 5)
+		btnCorner.Parent = btn
+
+		local btnStroke = Instance.new("UIStroke")
+		btnStroke.Color = (selectedWeaponType == wName) and PURPLE_MAIN or Color3.fromRGB(50, 50, 70)
+		btnStroke.Thickness = 1
+		btnStroke.Parent = btn
+
+		buttons[wName] = {btn = btn, stroke = btnStroke}
+
+		btn.MouseButton1Click:Connect(function()
+			selectedWeaponType = wName
+			for name, data in pairs(buttons) do
+				if name == wName then
+					data.btn.BackgroundColor3 = PURPLE_DARK_BG
+					data.btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+					data.stroke.Color = PURPLE_MAIN
+				else
+					data.btn.BackgroundColor3 = Color3.fromRGB(24, 24, 32)
+					data.btn.TextColor3 = Color3.fromRGB(160, 160, 180)
+					data.stroke.Color = Color3.fromRGB(50, 50, 70)
+				end
+			end
+		end)
+	end
+end
+
 local function createSlider(parentTab, titleText, minVal, maxVal, defaultVal, unitStr, callback)
 	local container = Instance.new("Frame")
 	container.Size = UDim2.new(0.95, 0, 0, 40)
@@ -536,7 +604,7 @@ local function tweenTeleport(targetCFrame)
 	isFarming = false
 
 	local distance = (hrp.Position - targetCFrame.Position).Magnitude
-	local speed = 250 -- ปรับความเร็วตรงนี้เหลือ 250 ตามต้องการ
+	local speed = 250
 	local travelTime = math.clamp(distance / speed, 0.5, 25)
 
 	local tweenInfo = TweenInfo.new(travelTime, Enum.EasingStyle.Linear)
@@ -606,6 +674,7 @@ createToggle(mainTab, "Auto Farm (1-2800)", false, function(state)
 	isFarming = state
 	if isFarming then startFarmingLoop() end
 end)
+createWeaponDropdown(mainTab) -- เพิ่มปุ่มเลือกประเภทอาวุธตรงนี้
 createToggle(mainTab, "Bring Mobs", false, function(state) bringMobEnabled = state end)
 createToggle(mainTab, "Kill Aura (Hit all nearby mobs)", false, function(state) killAuraEnabled = state end)
 createToggle(mainTab, "Hitbox Red Visual", false, function(state) showHitbox = state end)
@@ -817,8 +886,39 @@ task.spawn(function()
 end)
 
 -- -------------------------------------------------------
--- 7. Auto Farm & Kill Aura Loop (Fixed Safe Version)
+-- 7. Auto Farm & Weapon Logic (Fixed Smart Equipping)
 -- -------------------------------------------------------
+local function getDesiredWeapon()
+	local character = LocalPlayer.Character
+	local backpack = LocalPlayer:FindFirstChild("Backpack")
+	if not character or not backpack then return nil end
+
+	-- ค้นหาตามประเภทที่เลือกใน UI (Melee, Fruit, Sword)
+	for _, item in ipairs(backpack:GetChildren()) do
+		if item:IsA("Tool") then
+			local toolType = item:GetAttribute("ToolTip") or item.ToolTip or ""
+			local nameLower = item.Name:lower()
+
+			if selectedWeaponType == "Melee" then
+				if toolType == "Melee" or nameLower:find("fighting") or nameLower:find("step") or nameLower:find("karate") or nameLower:find("claw") or nameLower:find("talon") or nameLower:find("golem") or nameLower:find("godhuman") or nameLower:find("superhuman") then
+					return item
+				end
+			elseif selectedWeaponType == "Sword" then
+				if toolType == "Sword" or nameLower:find("blade") or nameLower:find("katana") or nameLower:find("sword") or nameLower:find("dark") or nameLower:find("rengoku") or nameLower:find("buddy") or nameLower:find("tushita") or nameLower:find("culling") then
+					return item
+				end
+			elseif selectedWeaponType == "Fruit" then
+				if toolType == "Blox Fruit" or nameLower:find("fruit") or nameLower:find("dough")  or nameLower:find("leopard") or nameLower:find("kitsune") or nameLower:find("trex") or nameLower:find("portal") or nameLower:find("awakening") then
+					return item
+				end
+			end
+		end
+	end
+
+	-- สำรอง: หากหาประเภทที่ตรงเป๊ะไม่เจอ ให้หยิบชิ้นแรกสุดในกระเป๋าแทน
+	return backpack:FindFirstChildOfClass("Tool")
+end
+
 function startFarmingLoop()
 	task.spawn(function()
 		local activeTween = nil
@@ -831,18 +931,19 @@ function startFarmingLoop()
 			if hrp and humanoid and humanoid.Health > 0 then
 				local tool = character:FindFirstChildOfClass("Tool")
 				if not tool then
-					local backpack = LocalPlayer:FindFirstChild("Backpack")
-					local sword = backpack and backpack:FindFirstChildOfClass("Tool")
-					if sword then 
-						humanoid:EquipTool(sword) 
-						tool = sword
+					local desiredTool = getDesiredWeapon()
+					if desiredTool then 
+						humanoid:EquipTool(desiredTool) 
+						tool = desiredTool
 					end
 				end
 
 				local currentQuest = getCurrentQuestData()
 
 				local aliveMonsters = {}
-				for _, v in ipairs(Workspace:GetChildren()) do
+				local allMonsters = Workspace:GetChildren()
+				for i = 1, #allMonsters do
+					local v = allMonsters[i]
 					if v.Name == currentQuest.mobName then
 						local eHum = v:FindFirstChildOfClass("Humanoid")
 						local eHrp = v:FindFirstChild("HumanoidRootPart")
@@ -861,7 +962,8 @@ function startFarmingLoop()
 
 					if primaryHrp then
 						if bringMobEnabled or killAuraEnabled then
-							for _, mob in ipairs(aliveMonsters) do
+							for i = 1, #aliveMonsters do
+								local mob = aliveMonsters[i]
 								local mHrp = mob:FindFirstChild("HumanoidRootPart")
 								if mHrp then
 									mHrp.CFrame = hrp.CFrame * CFrame.new(0, -2, -4)
