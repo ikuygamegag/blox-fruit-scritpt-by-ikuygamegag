@@ -1,5 +1,5 @@
 --[=[ 
-    Blox Fruit Hub - Full Fixed Version (Speed 150 Studs/s)
+    Blox Fruit Hub - Full Fixed Version (Speed 250 Studs/s)
     คัดลอกโค้ดทั้งหมดนี้ไปวางทับในสคริปต์ของคุณได้เลย
 ]=]
 
@@ -269,7 +269,7 @@ local chestEspEnabled = false
 local farmHeightY = 15
 local bringDistance = 150
 local attackDelay = 0.1
-local moveTweenSpeed = 150 -- ปรับความเร็ว Tween เป็น 150 ตามต้องการ
+local moveTweenSpeed = 250 -- ปรับความเร็ว Tween เป็น 250 ตามต้องการ
 
 -- -------------------------------------------------------
 -- 3. Level & Quest Database (1 to 2800)
@@ -526,7 +526,7 @@ local function createSlider(parentTab, titleText, minVal, maxVal, defaultVal, un
 	end)
 end
 
--- ระบบ Teleport แบบ Tween (ความเร็ว 150 Studs/s)
+-- ระบบ Teleport แบบ Tween (ความเร็ว 250 Studs/s)
 local function tweenTeleport(targetCFrame)
 	local character = LocalPlayer.Character
 	local hrp = character and character:FindFirstChild("HumanoidRootPart")
@@ -536,8 +536,8 @@ local function tweenTeleport(targetCFrame)
 	isFarming = false
 
 	local distance = (hrp.Position - targetCFrame.Position).Magnitude
-	local speed = 150 -- ปรับความเร็วตรงนี้เหลือ 150 ตามต้องการ
-	local travelTime = math.clamp(distance / speed, 0.5, 12)
+	local speed = 250 -- ปรับความเร็วตรงนี้เหลือ 250 ตามต้องการ
+	local travelTime = math.clamp(distance / speed, 0.5, 25)
 
 	local tweenInfo = TweenInfo.new(travelTime, Enum.EasingStyle.Linear)
 	local tween = TweenService:Create(hrp, tweenInfo, {CFrame = targetCFrame + Vector3.new(0, 5, 0)})
@@ -671,7 +671,7 @@ infoLabel.Parent = superhumanTab
 createSlider(settingsTab, "Farm Height", 5, 50, farmHeightY, "Studs", function(val) farmHeightY = val end)
 createSlider(settingsTab, "Bring Radius", 10, 300, bringDistance, "Studs", function(val) bringDistance = val end)
 createSlider(settingsTab, "Attack Delay", 0.01, 0.5, attackDelay, "Sec", function(val) attackDelay = val end)
-createSlider(settingsTab, "Move Speed (Tween)", 50, 300, moveTweenSpeed, "Studs/s", function(val) moveTweenSpeed = val end)
+createSlider(settingsTab, "Move Speed (Tween)", 30, 300, moveTweenSpeed, "Studs/s", function(val) moveTweenSpeed = val end)
 
 tabButtons["Main"].btn.BackgroundColor3 = PURPLE_DARK_BG
 tabButtons["Main"].btn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -880,7 +880,7 @@ function startFarmingLoop()
 						local distanceToTarget = (hrp.Position - targetPos).Magnitude
 
 						if not activeTween or activeTween.PlaybackState ~= Enum.PlaybackState.Playing then
-							local travelTime = math.clamp(distanceToTarget / moveTweenSpeed, 0.05, 1.5)
+							local travelTime = math.clamp(distanceToTarget / moveTweenSpeed, 0.05, 2.5)
 							local tweenInfo = TweenInfo.new(travelTime, Enum.EasingStyle.Linear)
 							activeTween = TweenService:Create(hrp, tweenInfo, {CFrame = CFrame.new(targetPos)})
 							activeTween:Play()
