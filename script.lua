@@ -1,6 +1,6 @@
 --[=[ 
-    Blox Fruit Hub - Fixed Version (No Freeze / Head Down Bug)
-    คัดลอกโค้ดทั้งหมดนี้ไปวางทับใน GitHub ของคุณได้เลย
+    Blox Fruit Hub - Full Fixed Version (No Freeze & Tween Teleport)
+    คัดลอกโค้ดทั้งหมดนี้ไปวางทับในสคริปต์ของคุณได้เลย
 ]=]
 
 local Players = game:GetService("Players")
@@ -89,7 +89,7 @@ local titleLabel = Instance.new("TextLabel")
 titleLabel.Size = UDim2.new(0, 320, 1, 0)
 titleLabel.Position = UDim2.new(0, 12, 0, 0)
 titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "Blox Fruit Hub <font color=\"rgb(150,150,170)\">• Fixed Version</font>"
+titleLabel.Text = "Blox Fruit Hub <font color=\"rgb(150,150,170)\">• Full Fixed Version</font>"
 titleLabel.RichText = true
 titleLabel.TextColor3 = Color3.fromRGB(240, 240, 240)
 titleLabel.Font = Enum.Font.GothamBold
@@ -526,12 +526,38 @@ local function createSlider(parentTab, titleText, minVal, maxVal, defaultVal, un
 	end)
 end
 
+-- ระบบ Teleport แบบ Tween (บินไป ไม่โดนดึงกลับ)
+local function tweenTeleport(targetCFrame)
+	local character = LocalPlayer.Character
+	local hrp = character and character:FindFirstChild("HumanoidRootPart")
+	if not hrp then return end
+
+	local oldFarmingState = isFarming
+	isFarming = false
+
+	local distance = (hrp.Position - targetCFrame.Position).Magnitude
+	local speed = 350 
+	local travelTime = math.clamp(distance / speed, 0.5, 8)
+
+	local tweenInfo = TweenInfo.new(travelTime, Enum.EasingStyle.Linear)
+	local tween = TweenService:Create(hrp, tweenInfo, {CFrame = targetCFrame + Vector3.new(0, 5, 0)})
+	tween:Play()
+	
+	tween.Completed:Wait()
+	hrp.CFrame = targetCFrame
+
+	if oldFarmingState then
+		isFarming = true
+		startFarmingLoop()
+	end
+end
+
 local function createTeleportButton(parentTab, islandName, targetCFrame)
 	local btn = Instance.new("TextButton")
 	btn.Size = UDim2.new(0.95, 0, 0, 32)
 	btn.BackgroundColor3 = Color3.fromRGB(24, 24, 32)
 	btn.TextColor3 = Color3.fromRGB(230, 230, 240)
-	btn.Text = "🏝️ " .. islandName
+	btn.Text = "✈️ " .. islandName
 	btn.Font = Enum.Font.GothamMedium
 	btn.TextSize = 12
 	btn.TextXAlignment = Enum.TextXAlignment.Left
@@ -551,11 +577,7 @@ local function createTeleportButton(parentTab, islandName, targetCFrame)
 	btnStroke.Parent = btn
 
 	btn.MouseButton1Click:Connect(function()
-		local char = LocalPlayer.Character
-		local hrp = char and char:FindFirstChild("HumanoidRootPart")
-		if hrp then
-			hrp.CFrame = targetCFrame
-		end
+		tweenTeleport(targetCFrame)
 	end)
 end
 
@@ -838,7 +860,6 @@ function startFarmingLoop()
 					local primaryHrp = primaryTarget:FindFirstChild("HumanoidRootPart")
 
 					if primaryHrp then
-						-- จัดการดึงมอนสเตอร์เบาๆ (ไม่ให้ตำแหน่งชนกับตัวละครจนหัวทิ่ม)
 						if bringMobEnabled or killAuraEnabled then
 							for _, mob in ipairs(aliveMonsters) do
 								local mHrp = mob:FindFirstChild("HumanoidRootPart")
