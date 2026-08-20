@@ -1,5 +1,5 @@
 --[=[ 
-    Blox Fruit Hub - Complete Version (1-2800)
+    Blox Fruit Hub - Complete Version + Kill Aura & Teleport (Sea 1-3)
     คัดลอกโค้ดทั้งหมดนี้ไปวางทับใน GitHub ของคุณได้เลย
 ]=]
 
@@ -8,6 +8,7 @@ local Workspace = game:GetService("Workspace")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TeleportService = game:GetService("TeleportService")
 
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -85,10 +86,10 @@ topHeaderCorner.CornerRadius = UDim.new(0, 8)
 topHeaderCorner.Parent = topHeader
 
 local titleLabel = Instance.new("TextLabel")
-titleLabel.Size = UDim2.new(0, 300, 1, 0)
+titleLabel.Size = UDim2.new(0, 320, 1, 0)
 titleLabel.Position = UDim2.new(0, 12, 0, 0)
 titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "Blox Fruit Hub <font color=\"rgb(150,150,170)\">• Level 1-2800 Auto</font>"
+titleLabel.Text = "Blox Fruit Hub <font color=\"rgb(150,150,170)\">• Teleport & Farm</font>"
 titleLabel.RichText = true
 titleLabel.TextColor3 = Color3.fromRGB(240, 240, 240)
 titleLabel.Font = Enum.Font.GothamBold
@@ -257,6 +258,7 @@ divider.Parent = contentArea
 -- -------------------------------------------------------
 local isFarming = false
 local bringMobEnabled = false
+local killAuraEnabled = false
 local showHitbox = true
 
 local playerEspEnabled = false
@@ -524,11 +526,57 @@ local function createSlider(parentTab, titleText, minVal, maxVal, defaultVal, un
 	end)
 end
 
+local function createTeleportButton(parentTab, islandName, targetCFrame)
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(0.95, 0, 0, 32)
+	btn.BackgroundColor3 = Color3.fromRGB(24, 24, 32)
+	btn.TextColor3 = Color3.fromRGB(230, 230, 240)
+	btn.Text = "🏝️ " .. islandName
+	btn.Font = Enum.Font.GothamMedium
+	btn.TextSize = 12
+	btn.TextXAlignment = Enum.TextXAlignment.Left
+	btn.Parent = parentTab
+
+	local pad = Instance.new("UIPadding")
+	pad.PaddingLeft = UDim.new(0, 10)
+	pad.Parent = btn
+
+	local btnCorner = Instance.new("UICorner")
+	btnCorner.CornerRadius = UDim.new(0, 6)
+	btnCorner.Parent = btn
+
+	local btnStroke = Instance.new("UIStroke")
+	btnStroke.Color = Color3.fromRGB(50, 50, 70)
+	btnStroke.Thickness = 1
+	btnStroke.Parent = btn
+
+	btn.MouseButton1Click:Connect(function()
+		local char = LocalPlayer.Character
+		local hrp = char and char:FindFirstChild("HumanoidRootPart")
+		if hrp then
+			hrp.CFrame = targetCFrame
+		end
+	end)
+end
+
+local function createSectionHeader(parentTab, text)
+	local lbl = Instance.new("TextLabel")
+	lbl.Size = UDim2.new(0.95, 0, 0, 24)
+	lbl.BackgroundTransparency = 1
+	lbl.Text = text
+	lbl.TextColor3 = PURPLE_ACCENT
+	lbl.Font = Enum.Font.GothamBold
+	lbl.TextSize = 12
+	lbl.TextXAlignment = Enum.TextXAlignment.Left
+	lbl.Parent = parentTab
+end
+
 -- -------------------------------------------------------
 -- 5. Build Tabs Content
 -- -------------------------------------------------------
 local mainTab = createTab("Main")
 local espTab = createTab("ESP Visual")
+local tpTab = createTab("Teleport")
 local superhumanTab = createTab("Superhuman")
 local settingsTab = createTab("Settings")
 
@@ -537,6 +585,7 @@ createToggle(mainTab, "Auto Farm (1-2800)", false, function(state)
 	if isFarming then startFarmingLoop() end
 end)
 createToggle(mainTab, "Bring Mobs", false, function(state) bringMobEnabled = state end)
+createToggle(mainTab, "Kill Aura (Hit all nearby mobs)", false, function(state) killAuraEnabled = state end)
 createToggle(mainTab, "Hitbox Red Visual", true, function(state) showHitbox = state end)
 
 createToggle(espTab, "Player ESP", false, function(state) playerEspEnabled = state end)
@@ -544,11 +593,46 @@ createToggle(espTab, "Monster ESP", false, function(state) mobEspEnabled = state
 createToggle(espTab, "Fruit ESP", false, function(state) fruitEspEnabled = state end)
 createToggle(espTab, "Chest ESP (Silver/Gold/Diamond)", false, function(state) chestEspEnabled = state end)
 
+-- Teleport Sea 1-3 List
+createSectionHeader(tpTab, "--- SEA 1 ---")
+createTeleportButton(tpTab, "Windmill / Starter (Marine)", CFrame.new(979, 16, 1429))
+createTeleportButton(tpTab, "Pirate Starter", CFrame.new(1062, 16, 1175))
+createTeleportButton(tpTab, "Jungle", CFrame.new(-1249, 12, 331))
+createTeleportButton(tpTab, "Pirate Village", CFrame.new(-1141, 4, 3827))
+createTeleportButton(tpTab, "Desert", CFrame.new(895, 7, 4388))
+createTeleportButton(tpTab, "Snow Island", CFrame.new(1210, 14, -5110))
+createTeleportButton(tpTab, "Marine Ford", CFrame.new(-4910, 50, 4315))
+createTeleportButton(tpTab, "Sky Island 1", CFrame.new(-4842, 717, -2623))
+createTeleportButton(tpTab, "Prison", CFrame.new(4875, 5, 734))
+createTeleportButton(tpTab, "Colosseum", CFrame.new(-1428, 8, -2824))
+createTeleportButton(tpTab, "Magma Village", CFrame.new(-5247, 9, 8472))
+createTeleportButton(tpTab, "Underwater City", CFrame.new(6116, 8, 1562))
+createTeleportButton(tpTab, "Fountain City", CFrame.new(5128, 5, 4114))
+
+createSectionHeader(tpTab, "--- SEA 2 ---")
+createTeleportButton(tpTab, "Kingdom of Rose", CFrame.new(-401, 73, 1805))
+createTeleportButton(tpTab, "Uvoy Island", CFrame.new(-2260, 15, -2975))
+createTeleportButton(tpTab, "Green Zone", CFrame.new(-2449, 73, -3212))
+createTeleportButton(tpTab, "Graveyard", CFrame.new(-5451, 19, -792))
+createTeleportButton(tpTab, "Snow Mountain", CFrame.new(602, 402, -5354))
+createTeleportButton(tpTab, "Ice Castle", CFrame.new(5513, 60, -6135))
+createTeleportButton(tpTab, "Dark Arena", CFrame.new(3779, 21, -3499))
+createTeleportButton(tpTab, "Forgotten Island", CFrame.new(-3032, 237, -10075))
+
+createSectionHeader(tpTab, "--- SEA 3 ---")
+createTeleportButton(tpTab, "Port Town", CFrame.new(-290, 7, 5339))
+createTeleportButton(tpTab, "Hydra Island", CFrame.new(5229, 603, 1255))
+createTeleportButton(tpTab, "Great Tree", CFrame.new(2650, 1682, -7178))
+createTeleportButton(tpTab, "Floating Turtle", CFrame.new(-12463, 335, -7552))
+createTeleportButton(tpTab, "Castle on the Sea", CFrame.new(-5043, 315, -3165))
+createTeleportButton(tpTab, "Haunted Castle", CFrame.new(-9515, 142, 5521))
+createTeleportButton(tpTab, "Sea of Treats", CFrame.new(-2055, 49, -12140))
+
 createToggle(superhumanTab, "Auto Farm Mastery (4 Styles)", false, function(state)
-	print("Auto Farm Mastery for Superhuman: " .. tostring(state))
+	print("Auto Farm Mastery for Superhuman: " + tostring(state))
 end)
 createToggle(superhumanTab, "Auto Buy Superhuman (When Ready)", false, function(state)
-	print("Auto Buy Superhuman: " .. tostring(state))
+	print("Auto Buy Superhuman: " + tostring(state))
 end)
 
 local infoLabel = Instance.new("TextLabel")
@@ -711,7 +795,7 @@ task.spawn(function()
 end)
 
 -- -------------------------------------------------------
--- 7. Standard Auto Farm Loop (Height 20 Studs & Extended Hitbox)
+-- 7. Auto Farm & Kill Aura Loop
 -- -------------------------------------------------------
 function startFarmingLoop()
 	task.spawn(function()
@@ -734,14 +818,6 @@ function startFarmingLoop()
 				end
 
 				local currentQuest = getCurrentQuestData()
-
-				-- พยายามเรียกรับเควสแบบปลอดภัยผ่าน pcall ป้องกันเกมเด้ง
-				pcall(function()
-					local questFolder = LocalPlayer.PlayerGui.Main:FindFirstChild("Quest")
-					if not questFolder or not questFolder.Visible then
-						ReplicatedStorage.Remotes.CommF_:InvokeServer("StartQuest", currentQuest.questName, currentQuest.levelReq)
-					end
-				end)
 
 				local aliveMonsters = {}
 				for _, v in ipairs(Workspace:GetChildren()) do
@@ -774,6 +850,22 @@ function startFarmingLoop()
 								if mHrp then
 									mHrp.CFrame = CFrame.new(hrp.Position.X, hrp.Position.Y - farmHeightY, hrp.Position.Z)
 									mHrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+								end
+							end
+						end
+
+						if killAuraEnabled then
+							for _, mob in ipairs(aliveMonsters) do
+								local mHrp = mob:FindFirstChild("HumanoidRootPart")
+								local mHum = mob:FindFirstChildOfClass("Humanoid")
+								if mHrp and mHum then
+									mHrp.CFrame = hrp.CFrame * CFrame.new(0, 0, -3)
+									pcall(function()
+										if tool and tool:FindFirstChild("Handle") then
+											firetouchinterest(mHrp, tool.Handle, 0)
+											firetouchinterest(mHrp, tool.Handle, 1)
+										end
+									end)
 								end
 							end
 						end
