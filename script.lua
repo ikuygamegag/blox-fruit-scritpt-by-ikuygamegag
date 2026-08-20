@@ -1,5 +1,5 @@
 --[=[ 
-    Blox Fruit Hub - Complete Version + Kill Aura & Teleport (Sea 1-3)
+    Blox Fruit Hub - Fixed Version (No Freeze / Head Down Bug)
     คัดลอกโค้ดทั้งหมดนี้ไปวางทับใน GitHub ของคุณได้เลย
 ]=]
 
@@ -89,7 +89,7 @@ local titleLabel = Instance.new("TextLabel")
 titleLabel.Size = UDim2.new(0, 320, 1, 0)
 titleLabel.Position = UDim2.new(0, 12, 0, 0)
 titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "Blox Fruit Hub <font color=\"rgb(150,150,170)\">• Teleport & Farm</font>"
+titleLabel.Text = "Blox Fruit Hub <font color=\"rgb(150,150,170)\">• Fixed Version</font>"
 titleLabel.RichText = true
 titleLabel.TextColor3 = Color3.fromRGB(240, 240, 240)
 titleLabel.Font = Enum.Font.GothamBold
@@ -259,17 +259,17 @@ divider.Parent = contentArea
 local isFarming = false
 local bringMobEnabled = false
 local killAuraEnabled = false
-local showHitbox = true
+local showHitbox = false
 
 local playerEspEnabled = false
 local mobEspEnabled = false
 local fruitEspEnabled = false
 local chestEspEnabled = false
 
-local farmHeightY = 20
-local bringDistance = 200
-local attackDelay = 0.05
-local moveTweenSpeed = 150
+local farmHeightY = 15
+local bringDistance = 150
+local attackDelay = 0.1
+local moveTweenSpeed = 200
 
 -- -------------------------------------------------------
 -- 3. Level & Quest Database (1 to 2800)
@@ -586,7 +586,7 @@ createToggle(mainTab, "Auto Farm (1-2800)", false, function(state)
 end)
 createToggle(mainTab, "Bring Mobs", false, function(state) bringMobEnabled = state end)
 createToggle(mainTab, "Kill Aura (Hit all nearby mobs)", false, function(state) killAuraEnabled = state end)
-createToggle(mainTab, "Hitbox Red Visual", true, function(state) showHitbox = state end)
+createToggle(mainTab, "Hitbox Red Visual", false, function(state) showHitbox = state end)
 
 createToggle(espTab, "Player ESP", false, function(state) playerEspEnabled = state end)
 createToggle(espTab, "Monster ESP", false, function(state) mobEspEnabled = state end)
@@ -629,10 +629,10 @@ createTeleportButton(tpTab, "Haunted Castle", CFrame.new(-9515, 142, 5521))
 createTeleportButton(tpTab, "Sea of Treats", CFrame.new(-2055, 49, -12140))
 
 createToggle(superhumanTab, "Auto Farm Mastery (4 Styles)", false, function(state)
-	print("Auto Farm Mastery for Superhuman: " + tostring(state))
+	print("Auto Farm Mastery for Superhuman: " .. tostring(state))
 end)
 createToggle(superhumanTab, "Auto Buy Superhuman (When Ready)", false, function(state)
-	print("Auto Buy Superhuman: " + tostring(state))
+	print("Auto Buy Superhuman: " .. tostring(state))
 end)
 
 local infoLabel = Instance.new("TextLabel")
@@ -795,7 +795,7 @@ task.spawn(function()
 end)
 
 -- -------------------------------------------------------
--- 7. Auto Farm & Kill Aura Loop
+-- 7. Auto Farm & Kill Aura Loop (Fixed Safe Version)
 -- -------------------------------------------------------
 function startFarmingLoop()
 	task.spawn(function()
@@ -828,12 +828,6 @@ function startFarmingLoop()
 							local dist = (eHrp.Position - hrp.Position).Magnitude
 							if dist <= bringDistance then
 								table.insert(aliveMonsters, v)
-
-								if showHitbox then
-									eHrp.Size = Vector3.new(25, 35, 25)
-									eHrp.CanCollide = false
-									eHrp.Transparency = 0.7
-								end
 							end
 						end
 					end
@@ -844,22 +838,13 @@ function startFarmingLoop()
 					local primaryHrp = primaryTarget:FindFirstChild("HumanoidRootPart")
 
 					if primaryHrp then
-						if bringMobEnabled then
+						-- จัดการดึงมอนสเตอร์เบาๆ (ไม่ให้ตำแหน่งชนกับตัวละครจนหัวทิ่ม)
+						if bringMobEnabled or killAuraEnabled then
 							for _, mob in ipairs(aliveMonsters) do
 								local mHrp = mob:FindFirstChild("HumanoidRootPart")
 								if mHrp then
-									mHrp.CFrame = CFrame.new(hrp.Position.X, hrp.Position.Y - farmHeightY, hrp.Position.Z)
+									mHrp.CFrame = hrp.CFrame * CFrame.new(0, -2, -4)
 									mHrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-								end
-							end
-						end
-
-						if killAuraEnabled then
-							for _, mob in ipairs(aliveMonsters) do
-								local mHrp = mob:FindFirstChild("HumanoidRootPart")
-								local mHum = mob:FindFirstChildOfClass("Humanoid")
-								if mHrp and mHum then
-									mHrp.CFrame = hrp.CFrame * CFrame.new(0, 0, -3)
 									pcall(function()
 										if tool and tool:FindFirstChild("Handle") then
 											firetouchinterest(mHrp, tool.Handle, 0)
