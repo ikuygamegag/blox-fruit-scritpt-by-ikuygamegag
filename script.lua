@@ -1,3 +1,8 @@
+--[=[ 
+    Blox Fruit Hub - Complete Version (1-2800)
+    คัดลอกโค้ดทั้งหมดนี้ไปวางทับใน GitHub ของคุณได้เลย
+]=]
+
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local UserInputService = game:GetService("UserInputService")
@@ -259,7 +264,7 @@ local mobEspEnabled = false
 local fruitEspEnabled = false
 local chestEspEnabled = false
 
-local farmHeightY = 20 -- ตั้งค่าเริ่มต้นความสูงเหนือหัวมอนสเตอร์เป็น 20 Studs
+local farmHeightY = 20
 local bringDistance = 200
 local attackDelay = 0.05
 local moveTweenSpeed = 150
@@ -729,14 +734,14 @@ function startFarmingLoop()
 				end
 
 				local currentQuest = getCurrentQuestData()
-				local questFolder = LocalPlayer:FindFirstChild("PlayerGui") and LocalPlayer.PlayerGui:FindFirstChild("Main")
-				local questActive = questFolder and questFolder:FindFirstChild("Quest") and questFolder.Quest.Visible
 
-				if not questActive then
-					pcall(function()
+				-- พยายามเรียกรับเควสแบบปลอดภัยผ่าน pcall ป้องกันเกมเด้ง
+				pcall(function()
+					local questFolder = LocalPlayer.PlayerGui.Main:FindFirstChild("Quest")
+					if not questFolder or not questFolder.Visible then
 						ReplicatedStorage.Remotes.CommF_:InvokeServer("StartQuest", currentQuest.questName, currentQuest.levelReq)
-					end)
-				end
+					end
+				end)
 
 				local aliveMonsters = {}
 				for _, v in ipairs(Workspace:GetChildren()) do
@@ -748,7 +753,6 @@ function startFarmingLoop()
 							if dist <= bringDistance then
 								table.insert(aliveMonsters, v)
 
-								-- ขยาย Hitbox ของมอนสเตอร์ให้สูงและกว้างครอบคลุมถึงระยะที่ตัวละครลอยอยู่ (20 Studs) เพื่อให้ตีโดน
 								if showHitbox then
 									eHrp.Size = Vector3.new(25, 35, 25)
 									eHrp.CanCollide = false
@@ -774,7 +778,6 @@ function startFarmingLoop()
 							end
 						end
 
-						-- ลอยตัวอยู่เหนือหัวมอนสเตอร์ตามค่า `farmHeightY` (ตั้งค่าเริ่มต้นไว้ที่ 20 Studs)
 						local targetPos = Vector3.new(primaryHrp.Position.X, primaryHrp.Position.Y + farmHeightY, primaryHrp.Position.Z)
 						local distanceToTarget = (hrp.Position - targetPos).Magnitude
 
