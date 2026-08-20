@@ -1,5 +1,5 @@
 --[=[ 
-    Blox Fruit Hub - Full Fixed Version (Speed 300 Studs/s)
+    Blox Fruit Hub - Full Fixed Version (Speed 150 Studs/s)
     คัดลอกโค้ดทั้งหมดนี้ไปวางทับในสคริปต์ของคุณได้เลย
 ]=]
 
@@ -269,7 +269,7 @@ local chestEspEnabled = false
 local farmHeightY = 15
 local bringDistance = 150
 local attackDelay = 0.1
-local moveTweenSpeed = 300 -- ตั้งค่าความเร็ว Tween เป็น 300 เรียบร้อย
+local moveTweenSpeed = 150 -- ปรับความเร็ว Tween เป็น 150 ตามต้องการ
 
 -- -------------------------------------------------------
 -- 3. Level & Quest Database (1 to 2800)
@@ -526,7 +526,7 @@ local function createSlider(parentTab, titleText, minVal, maxVal, defaultVal, un
 	end)
 end
 
--- ระบบ Teleport แบบ Tween (ความเร็ว 300 Studs/s)
+-- ระบบ Teleport แบบ Tween (ความเร็ว 150 Studs/s)
 local function tweenTeleport(targetCFrame)
 	local character = LocalPlayer.Character
 	local hrp = character and character:FindFirstChild("HumanoidRootPart")
@@ -536,8 +536,8 @@ local function tweenTeleport(targetCFrame)
 	isFarming = false
 
 	local distance = (hrp.Position - targetCFrame.Position).Magnitude
-	local speed = 300 -- ปรับความเร็วตรงนี้เหลือ 300 ตามต้องการ
-	local travelTime = math.clamp(distance / speed, 0.5, 8)
+	local speed = 150 -- ปรับความเร็วตรงนี้เหลือ 150 ตามต้องการ
+	local travelTime = math.clamp(distance / speed, 0.5, 12)
 
 	local tweenInfo = TweenInfo.new(travelTime, Enum.EasingStyle.Linear)
 	local tween = TweenService:Create(hrp, tweenInfo, {CFrame = targetCFrame + Vector3.new(0, 5, 0)})
